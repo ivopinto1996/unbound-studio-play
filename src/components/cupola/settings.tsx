@@ -244,7 +244,7 @@ function Company() {
         title="Membros"
         desc={`${members.length} pessoas com acesso`}
         action={
-          <form onSubmit={(e) => { e.preventDefault(); if (!invite.includes("@")) return toast.error("Escreva um email válido"); setMembers([...members, { n: invite.split("@")[0]!, e: invite, r: "Leitura", last: "convite enviado" }]); setInvite(""); toast.success("Convite enviado"); }} className="flex gap-2">
+          <form onSubmit={(e) => { e.preventDefault(); if (!invite.includes("@")) { toast.error("Escreva um email válido"); return; } setMembers([...members, { n: invite.split("@")[0]!, e: invite, r: "Leitura", last: "convite enviado" }]); setInvite(""); toast.success("Convite enviado"); }} className="flex gap-2">
             <input value={invite} onChange={(e) => setInvite(e.target.value)} placeholder="email@empresa.pt" className="w-48 rounded-lg border bg-paper px-3 py-1.5 text-sm outline-none focus:border-primary" />
             <button className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"><Plus className="size-3.5" /> Convidar</button>
           </form>
