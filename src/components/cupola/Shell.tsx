@@ -6,7 +6,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { deck, MODULES, type ModuleId, type Tab, type ViewId } from "./data";
+import { deck, homeView, MODULES, type ModuleId, type Tab, type ViewId } from "./data";
+import { GROUPS, MODULE_DEFS, getDef } from "./modules";
 import { Workspace } from "./views";
 
 let seq = 10;
@@ -99,6 +100,19 @@ export function CupolaShell() {
         ];
       case "settings":
         return [{ label: "Guardar alterações", icon: Check, run: () => toast.success("Guardado") }];
+      case "catalogue":
+        return [{ label: "Pedir recomendação de módulo", ai: true, icon: Sparkles, run: () => runBackground("Recomendação") }];
+      case "mod-dashboard":
+      case "mod-list":
+      case "mod-chat":
+      case "mod-features": {
+        const def = getDef(active.module);
+        if (!def) return [];
+        return [
+          { label: def.primary, ai: true, icon: Sparkles, run: () => runBackground(def.primary) },
+          ...def.secondary.map((s) => ({ label: s, run: () => toast(s, { description: def.name }) })),
+        ];
+      }
       default:
         return [
           { label: "Pedir resumo da semana", ai: true, icon: Sparkles, run: () => runBackground("Resumo semanal") },
@@ -109,7 +123,7 @@ export function CupolaShell() {
   }, [active.view, active.id]);
 
   const crumbs = crumbsFor(active);
-  const hasList = ["lf-pipeline", "bm-queue", "operations"].includes(active.view);
+  const hasList = ["lf-pipeline", "bm-queue", "operations", "mod-list", "mod-features", "catalogue"].includes(active.view);
   const errors = deck.transversal.erros_ativos.length + tabs.filter((t) => t.state === "error").length - 1;
 
   return (
@@ -128,9 +142,22 @@ export function CupolaShell() {
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 text-sm">
           <SideItem icon={LayoutGrid} label="Visão geral" onClick={() => open("suite", "suite-dashboard", "Visão geral")} on={active.view === "suite-dashboard"} />
           <SideItem icon={Radar} label="Operations" badge={errors} onClick={() => setOpsOpen(true)} on={opsOpen} />
-          <SideLabel>Módulos</SideLabel>
-          <SideItem icon={Users} label="LeadFlow" onClick={() => open("leadflow", "lf-dashboard", "LeadFlow")} on={active.module === "leadflow"} />
-          <SideItem icon={Boxes} label="BOMify" onClick={() => open("bomify", "bm-queue", "Fila de pedidos")} on={active.module === "bomify"} />
+          <SideItem icon={Boxes} label="Todos os módulos" onClick={() => open("suite", "catalogue", "Módulos")} on={active.view === "catalogue"} />
+          {GROUPS.map((g) => (
+            <div key={g}>
+              <SideLabel>{g}</SideLabel>
+              {MODULE_DEFS.filter((m) => m.group === g).map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => open(m.id, homeView(m.id), m.name)}
+                  className={cn("flex w-full items-center gap-2.5 rounded-lg px-3 py-1.5 text-left transition-colors", active.module === m.id ? "bg-chrome-raised text-chrome-foreground" : "text-chrome-muted hover:bg-chrome-raised hover:text-chrome-foreground")}
+                >
+                  <span className={cn("num flex h-5 w-6 items-center justify-center rounded text-[9px] font-medium", active.module === m.id ? "bg-primary text-primary-foreground" : "bg-chrome-raised")}>{m.short}</span>
+                  <span className="truncate">{m.name}</span>
+                </button>
+              ))}
+            </div>
+          ))}
           <SideLabel>Intenções abertas</SideLabel>
           {tabs.filter((t) => t.module !== "suite").map((t) => (
             <button key={t.id} onClick={() => setActiveId(t.id)} className="flex items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs text-chrome-muted hover:bg-chrome-raised hover:text-chrome-foreground">
