@@ -6,7 +6,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { deck, MODULES, type ModuleId, type Tab, type ViewId } from "./data";
+import { deck, homeView, MODULES, type ModuleId, type Tab, type ViewId } from "./data";
+import { GROUPS, MODULE_DEFS, getDef } from "./modules";
 import { Workspace } from "./views";
 
 let seq = 10;
@@ -38,7 +39,7 @@ export function CupolaShell() {
           if (t.state !== "background") return t;
           const p = Math.min(100, (t.progress ?? 0) + 6 + Math.random() * 6);
           if (p >= 100) {
-            toast.success(`${MODULES[t.module].name}: operação concluída`, { description: t.title });
+            toast.success(`${MODULES[t.module]?.name}: operação concluída`, { description: t.title });
             return { ...t, state: "done", progress: 100 };
           }
           return { ...t, progress: p };
@@ -99,6 +100,19 @@ export function CupolaShell() {
         ];
       case "settings":
         return [{ label: "Guardar alterações", icon: Check, run: () => toast.success("Guardado") }];
+      case "catalogue":
+        return [{ label: "Pedir recomendação de módulo", ai: true, icon: Sparkles, run: () => runBackground("Recomendação") }];
+      case "mod-dashboard":
+      case "mod-list":
+      case "mod-chat":
+      case "mod-features": {
+        const def = getDef(active.module);
+        if (!def) return [];
+        return [
+          { label: def.primary, ai: true, icon: Sparkles, run: () => runBackground(def.primary) },
+          ...def.secondary.map((s) => ({ label: s, run: () => toast(s, { description: def.name }) })),
+        ];
+      }
       default:
         return [
           { label: "Pedir resumo da semana", ai: true, icon: Sparkles, run: () => runBackground("Resumo semanal") },
@@ -109,7 +123,7 @@ export function CupolaShell() {
   }, [active.view, active.id]);
 
   const crumbs = crumbsFor(active);
-  const hasList = ["lf-pipeline", "bm-queue", "operations"].includes(active.view);
+  const hasList = ["lf-pipeline", "bm-queue", "operations", "mod-list", "mod-features", "catalogue"].includes(active.view);
   const errors = deck.transversal.erros_ativos.length + tabs.filter((t) => t.state === "error").length - 1;
 
   return (
@@ -128,9 +142,22 @@ export function CupolaShell() {
         <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 text-sm">
           <SideItem icon={LayoutGrid} label="Visão geral" onClick={() => open("suite", "suite-dashboard", "Visão geral")} on={active.view === "suite-dashboard"} />
           <SideItem icon={Radar} label="Operations" badge={errors} onClick={() => setOpsOpen(true)} on={opsOpen} />
-          <SideLabel>Módulos</SideLabel>
-          <SideItem icon={Users} label="LeadFlow" onClick={() => open("leadflow", "lf-dashboard", "LeadFlow")} on={active.module === "leadflow"} />
-          <SideItem icon={Boxes} label="BOMify" onClick={() => open("bomify", "bm-queue", "Fila de pedidos")} on={active.module === "bomify"} />
+          <SideItem icon={Boxes} label="Todos os módulos" onClick={() => open("suite", "catalogue", "Módulos")} on={active.view === "catalogue"} />
+          {GROUPS.map((g) => (
+            <div key={g}>
+              <SideLabel>{g}</SideLabel>
+              {MODULE_DEFS.filter((m) => m.group === g).map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => open(m.id, homeView(m.id), m.name)}
+                  className={cn("flex w-full items-center gap-2.5 rounded-lg px-3 py-1.5 text-left transition-colors", active.module === m.id ? "bg-chrome-raised text-chrome-foreground" : "text-chrome-muted hover:bg-chrome-raised hover:text-chrome-foreground")}
+                >
+                  <span className={cn("num flex h-5 w-6 items-center justify-center rounded text-[9px] font-medium", active.module === m.id ? "bg-primary text-primary-foreground" : "bg-chrome-raised")}>{m.short}</span>
+                  <span className="truncate">{m.name}</span>
+                </button>
+              ))}
+            </div>
+          ))}
           <SideLabel>Intenções abertas</SideLabel>
           {tabs.filter((t) => t.module !== "suite").map((t) => (
             <button key={t.id} onClick={() => setActiveId(t.id)} className="flex items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs text-chrome-muted hover:bg-chrome-raised hover:text-chrome-foreground">
@@ -170,7 +197,7 @@ export function CupolaShell() {
                 t.id === active.id ? "bg-background text-foreground" : "text-chrome-muted hover:bg-chrome-raised hover:text-chrome-foreground",
               )}
             >
-              <span className={cn("num rounded px-1 text-[10px]", t.id === active.id ? "bg-secondary text-muted-foreground" : "bg-chrome-raised")}>{MODULES[t.module].short}</span>
+              <span className={cn("num rounded px-1 text-[10px]", t.id === active.id ? "bg-secondary text-muted-foreground" : "bg-chrome-raised")}>{MODULES[t.module]?.short}</span>
               <span className="truncate font-medium">{t.title}</span>
               <StateDot state={t.state} />
               <button onClick={(e) => { e.stopPropagation(); close(t.id); }} className="opacity-0 transition-opacity group-hover:opacity-60 hover:opacity-100!">
@@ -184,7 +211,7 @@ export function CupolaShell() {
             </div>
           ))}
           <button
-            onClick={() => open(active.module === "suite" ? "leadflow" : active.module, active.module === "bomify" ? "bm-queue" : "lf-pipeline", "Nova intenção" + " " + (seq - 9))}
+            onClick={() => { const m = active.module === "suite" ? "leadflow" : active.module; const v: ViewId = m === "bomify" ? "bm-queue" : m === "leadflow" ? "lf-pipeline" : "mod-list"; const t: Tab = { id: uid(), module: m, view: v, title: `Nova intenção · ${MODULES[m]?.name}`, state: "active" }; setTabs((ts) => [...ts, t]); setActiveId(t.id); }}
             className="mb-1.5 ml-1 flex size-7 shrink-0 items-center justify-center rounded-lg text-chrome-muted hover:bg-chrome-raised hover:text-chrome-foreground"
             title="Nova intenção"
           >
@@ -281,14 +308,19 @@ export function CupolaShell() {
   );
 }
 
-function crumbsFor(t: Tab): { label: string; view?: ViewId; title?: string }[] {
-  const m = MODULES[t.module].name;
+function crumbsFor(t: Tab): { label: string; view?: ViewId | undefined; title?: string | undefined }[] {
+  const m: string = MODULES[t.module]?.name ?? "";
   switch (t.view) {
     case "lf-dashboard": return [{ label: m }, { label: "Dashboard" }];
     case "lf-pipeline": return [{ label: m, view: "lf-dashboard", title: "LeadFlow" }, { label: "Pipeline" }];
     case "bm-queue": return [{ label: m }, { label: "Pedidos" }];
     case "bm-review": return [{ label: m }, { label: "Pedidos", view: "bm-queue", title: "Fila de pedidos" }, { label: t.recordId ?? "" }, { label: "Revisão" }];
     case "settings": return [{ label: "Cupola" }, { label: "Definições" }];
+    case "catalogue": return [{ label: "Cupola" }, { label: "Módulos" }];
+    case "mod-dashboard": return [{ label: m }, { label: "Dashboard" }];
+    case "mod-list": return [{ label: m, view: "mod-dashboard" }, { label: getDef(t.module)?.list.title ?? "" }];
+    case "mod-chat": return [{ label: m, view: "mod-dashboard" }, { label: "Conversa" }];
+    case "mod-features": return [{ label: m, view: "mod-dashboard" }, { label: "Funcionalidades" }];
     default: return [{ label: "Cupola" }, { label: "Visão geral" }];
   }
 }
@@ -313,7 +345,7 @@ function OperationsPanel({ tabs, onClose, goTab }: { tabs: Tab[]; onClose: () =>
             {running.length === 0 && <p className="text-sm text-muted-foreground">Nada a correr.</p>}
             {running.map((r) => (
               <button key={r.id} onClick={() => goTab(r.id)} className="mb-2 w-full rounded-xl border bg-card p-4 text-left hover:border-primary/50">
-                <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground"><span>{MODULES[r.module].name}</span><span className="num">{Math.round(r.progress ?? 0)}%</span></div>
+                <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground"><span>{MODULES[r.module]?.name}</span><span className="num">{Math.round(r.progress ?? 0)}%</span></div>
                 <div className="text-sm font-medium">{r.title}</div>
                 <div className="mt-3 h-1 overflow-hidden rounded bg-secondary"><div className="h-full bg-ai transition-all" style={{ width: `${r.progress}%` }} /></div>
               </button>

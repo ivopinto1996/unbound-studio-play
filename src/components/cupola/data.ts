@@ -1,15 +1,21 @@
 import deck from "@/data/deck.json";
+import { MODULE_DEFS } from "./modules";
 
 export { deck };
 
-export type ModuleId = "suite" | "leadflow" | "bomify";
+export type ModuleId = string;
 export type ViewId =
   | "suite-dashboard"
+  | "catalogue"
   | "operations"
   | "lf-dashboard"
   | "lf-pipeline"
   | "bm-queue"
   | "bm-review"
+  | "mod-dashboard"
+  | "mod-list"
+  | "mod-chat"
+  | "mod-features"
   | "settings";
 export type TabState = "active" | "background" | "done" | "error";
 
@@ -23,11 +29,12 @@ export interface Tab {
   recordId?: string | undefined;
 }
 
-export const MODULES: Record<ModuleId, { name: string; short: string; tagline: string }> = {
+export const MODULES: Record<string, { name: string; short: string; tagline: string }> = {
   suite: { name: "Cupola", short: "CU", tagline: "Suite" },
-  leadflow: { name: "LeadFlow", short: "LF", tagline: "Prospeção comercial" },
-  bomify: { name: "BOMify", short: "BM", tagline: "Pedidos e listas de materiais" },
+  ...Object.fromEntries(MODULE_DEFS.map((m) => [m.id, { name: m.name, short: m.short, tagline: m.tagline }])),
 };
+
+export const homeView = (id: string): ViewId => (id === "leadflow" ? "lf-dashboard" : id === "bomify" ? "bm-queue" : id === "suite" ? "suite-dashboard" : "mod-dashboard");
 
 const companies = [
   "Ferrosteel Ibérica", "Mecânica do Tejo", "Metalúrgica Oeste", "Serviço Metal Norte", "Fundição Ribeira",
