@@ -1,0 +1,303 @@
+{
+  "_meta": {
+    "data_cutoff": "2026-09-07T14:00:00Z",
+    "periodo_cobertura": "2026-07-01 a 2026-09-07",
+    "utilizador": "Empresa demo — PME industrial portuguesa",
+    "modulos_subscritos": ["LeadFlow", "BOMify"]
+  },
+
+  "leadflow": {
+    "_historia": "Em agosto houve uma campanha de prospeção direcionada ao setor metalomecânico que gerou um pico de leads na 3ª semana. Na semana de 18-24 ago, a integração com o LinkedIn falhou durante 3 dias, reduzindo o volume de enrichment. Isso explica o aumento de leads 'sem contacto identificado' nesse período.",
+
+    "pipeline": {
+      "total_leads": 1047,
+      "ativas": 612,
+      "inativas": 289,
+      "em_risco": 146,
+      "sem_contacto_identificado": 78
+    },
+
+    "leads_novas": {
+      "agosto_2026": 134,
+      "agosto_2025": 89,
+      "variacao_pct": 50.6,
+      "nota": "Campanha metalomecânica 3ª semana ago 2026"
+    },
+
+    "origem": {
+      "geradas_por_agente": 94,
+      "registadas_manualmente": 40,
+      "pct_agente": 70.1
+    },
+
+    "ultimas_operacoes": [
+      {
+        "id": "op-lf-0091",
+        "tipo": "geração",
+        "timestamp": "2026-09-07T09:14:22Z",
+        "leads_trazidas": 18,
+        "estado": "concluída",
+        "duracao_seg": 47
+      },
+      {
+        "id": "op-lf-0090",
+        "tipo": "qualificação",
+        "timestamp": "2026-09-06T16:33:05Z",
+        "leads_processadas": 32,
+        "estado": "concluída",
+        "duracao_seg": 91
+      },
+      {
+        "id": "op-lf-0089",
+        "tipo": "enrichment",
+        "timestamp": "2026-09-05T11:07:44Z",
+        "leads_processadas": 0,
+        "estado": "erro",
+        "erro": "LinkedIn API timeout — sem contactos identificados",
+        "duracao_seg": 30
+      },
+      {
+        "id": "op-lf-0088",
+        "tipo": "geração",
+        "timestamp": "2026-09-04T14:52:18Z",
+        "leads_trazidas": 22,
+        "estado": "concluída",
+        "duracao_seg": 53
+      },
+      {
+        "id": "op-lf-0087",
+        "tipo": "qualificação",
+        "timestamp": "2026-09-03T10:28:37Z",
+        "leads_processadas": 41,
+        "estado": "concluída",
+        "duracao_seg": 118
+      }
+    ],
+
+    "creditos_agosto_2026": {
+      "total_tokens": 284500,
+      "por_tipo": {
+        "geracao": 142300,
+        "qualificacao": 98700,
+        "enrichment": 43500
+      }
+    }
+  },
+
+  "bomify": {
+    "_historia": "Na semana de 25-31 ago, um cliente novo (Metalúrgica Oeste Lda.) começou a enviar pedidos com ficheiros DWG exportados de uma versão antiga do AutoCAD. O sistema identificou as peças mas as dimensões saíam com unidades erradas (polegadas em vez de mm), gerando alertas de conflito em 7 dos 11 pedidos dessa semana. O cliente foi contactado e corrigiu o export a partir de 1 set.",
+
+    "volume_agosto_2026": {
+      "total_pedidos": 63,
+      "por_estado": {
+        "done": 41,
+        "draft": 14,
+        "cancelled": 8
+      }
+    },
+
+    "alertas": {
+      "total_abertos_hoje": 6,
+      "por_tipo": {
+        "conflito_email_desenho": 3,
+        "dados_em_falta": 2,
+        "peca_nao_identificada": 1
+      },
+      "nota": "3 dos alertas de conflito são do cliente Metalúrgica Oeste Lda. — aguardam reenvio de ficheiros corrigidos"
+    },
+
+    "performance": {
+      "tempo_medio_processamento_min": 18,
+      "taxa_confirmacao_primeira_pct": 73.2,
+      "pedidos_sem_alertas": 46,
+      "pedidos_com_alertas": 17
+    },
+
+    "ultimas_boms_confirmadas": [
+      {
+        "order_number": "ORD2026/0412",
+        "timestamp": "2026-09-07T11:42:00Z",
+        "cliente": "Ferrosteel Ibérica S.A.",
+        "linhas": 24,
+        "estado": "Done"
+      },
+      {
+        "order_number": "ORD2026/0411",
+        "timestamp": "2026-09-06T17:05:00Z",
+        "cliente": "Mecânica do Tejo Lda.",
+        "linhas": 9,
+        "estado": "Done"
+      },
+      {
+        "order_number": "ORD2026/0410",
+        "timestamp": "2026-09-06T09:21:00Z",
+        "cliente": "Indústrias Carvalho & Filhos",
+        "linhas": 37,
+        "estado": "Done"
+      },
+      {
+        "order_number": "ORD2026/0409",
+        "timestamp": "2026-09-05T15:58:00Z",
+        "cliente": "Serviço Metal Norte S.A.",
+        "linhas": 15,
+        "estado": "Done"
+      },
+      {
+        "order_number": "ORD2026/0408",
+        "timestamp": "2026-09-05T10:34:00Z",
+        "cliente": "Fábrica de Peças Alentejo Lda.",
+        "linhas": 6,
+        "estado": "Done"
+      }
+    ],
+
+    "ultimas_boms_com_erro": [
+      {
+        "order_number": "ORD2026/0413",
+        "timestamp": "2026-09-07T13:10:00Z",
+        "cliente": "Metalúrgica Oeste Lda.",
+        "alerta": "conflito_email_desenho",
+        "descricao": "Dimensões em polegadas no DWG vs. mm no email — aguarda ficheiro corrigido",
+        "estado": "Draft"
+      },
+      {
+        "order_number": "ORD2026/0407",
+        "timestamp": "2026-09-04T08:47:00Z",
+        "cliente": "Soluções Ferro Centro S.A.",
+        "alerta": "peca_nao_identificada",
+        "descricao": "Referência P-7821-X não encontrada no catálogo — requer input manual",
+        "estado": "Draft"
+      }
+    ],
+
+    "creditos_agosto_2026": {
+      "total_tokens": 118200,
+      "por_tipo": {
+        "extracao_nlp": 71400,
+        "classificacao": 32600,
+        "alertas_ia": 14200
+      }
+    }
+  },
+
+  "transversal": {
+    "operacoes_em_curso": [
+      {
+        "id": "op-lf-0092",
+        "modulo": "LeadFlow",
+        "tipo": "qualificação",
+        "descricao": "A qualificar 28 leads da campanha metalomecânica",
+        "iniciada_em": "2026-09-07T13:52:00Z",
+        "progresso_pct": 64,
+        "estado": "a_correr"
+      }
+    ],
+
+    "erros_ativos": [
+      {
+        "id": "err-lf-0089",
+        "modulo": "LeadFlow",
+        "tipo": "enrichment",
+        "descricao": "LinkedIn API timeout — 12 leads sem contacto identificado",
+        "desde": "2026-09-05T11:07:44Z",
+        "acao_necessaria": "Rever leads manualmente ou retentar enrichment"
+      },
+      {
+        "id": "err-bm-0413",
+        "modulo": "BOMify",
+        "tipo": "conflito_email_desenho",
+        "descricao": "ORD2026/0413 — Metalúrgica Oeste Lda. — dimensões incorretas",
+        "desde": "2026-09-07T13:10:00Z",
+        "acao_necessaria": "Aguardar ficheiro DWG corrigido do cliente"
+      },
+      {
+        "id": "err-bm-0407",
+        "modulo": "BOMify",
+        "tipo": "peca_nao_identificada",
+        "descricao": "ORD2026/0407 — Referência P-7821-X não encontrada",
+        "desde": "2026-09-04T08:47:00Z",
+        "acao_necessaria": "Identificar peça manualmente e atualizar catálogo"
+      }
+    ],
+
+    "atividade_recente": [
+      {
+        "timestamp": "2026-09-07T13:52:00Z",
+        "modulo": "LeadFlow",
+        "evento": "Qualificação iniciada — 28 leads",
+        "tipo": "operacao_em_curso"
+      },
+      {
+        "timestamp": "2026-09-07T13:10:00Z",
+        "modulo": "BOMify",
+        "evento": "Alerta aberto — ORD2026/0413 conflito dimensões",
+        "tipo": "erro"
+      },
+      {
+        "timestamp": "2026-09-07T11:42:00Z",
+        "modulo": "BOMify",
+        "evento": "BOM confirmada — ORD2026/0412 (24 linhas)",
+        "tipo": "concluido"
+      },
+      {
+        "timestamp": "2026-09-07T09:14:22Z",
+        "modulo": "LeadFlow",
+        "evento": "Geração concluída — 18 novas leads",
+        "tipo": "concluido"
+      },
+      {
+        "timestamp": "2026-09-06T17:05:00Z",
+        "modulo": "BOMify",
+        "evento": "BOM confirmada — ORD2026/0411 (9 linhas)",
+        "tipo": "concluido"
+      },
+      {
+        "timestamp": "2026-09-06T16:33:05Z",
+        "modulo": "LeadFlow",
+        "evento": "Qualificação concluída — 32 leads processadas",
+        "tipo": "concluido"
+      },
+      {
+        "timestamp": "2026-09-06T09:21:00Z",
+        "modulo": "BOMify",
+        "evento": "BOM confirmada — ORD2026/0410 (37 linhas)",
+        "tipo": "concluido"
+      },
+      {
+        "timestamp": "2026-09-05T15:58:00Z",
+        "modulo": "BOMify",
+        "evento": "BOM confirmada — ORD2026/0409 (15 linhas)",
+        "tipo": "concluido"
+      },
+      {
+        "timestamp": "2026-09-05T11:07:44Z",
+        "modulo": "LeadFlow",
+        "evento": "Erro enrichment — LinkedIn API timeout",
+        "tipo": "erro"
+      },
+      {
+        "timestamp": "2026-09-05T10:34:00Z",
+        "modulo": "BOMify",
+        "evento": "BOM confirmada — ORD2026/0408 (6 linhas)",
+        "tipo": "concluido"
+      }
+    ],
+
+    "creditos": {
+      "quota_mensal_tokens": 500000,
+      "consumidos_agosto_2026": 402700,
+      "percentagem_usada": 80.5,
+      "por_modulo": {
+        "LeadFlow": {
+          "tokens": 284500,
+          "pct_do_total": 70.6
+        },
+        "BOMify": {
+          "tokens": 118200,
+          "pct_do_total": 29.4
+        }
+      },
+      "tendencia": "A ritmo atual de setembro (+12% vs. agosto), a quota pode ser atingida antes do fim do mês"
+    }
+  }
+}
