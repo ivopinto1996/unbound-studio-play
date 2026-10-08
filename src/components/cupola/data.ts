@@ -62,8 +62,8 @@ const d = deck.bomify;
 export const ORDERS: Order[] = [
   ...d.ultimas_boms_com_erro.map((o) => ({ id: o.order_number, client: o.cliente, lines: 0, status: "Draft" as const, when: o.timestamp, alert: o.descricao })),
   ...d.ultimas_boms_confirmadas.map((o) => ({ id: o.order_number, client: o.cliente, lines: o.linhas, status: "Done" as const, when: o.timestamp } as Order)),
-  { id: "ORD2026/0406", client: "Lusoforja Lda.", lines: 12, status: "Draft", when: "2026-09-03T12:00:00Z" },
-  { id: "ORD2026/0405", client: "Perfis Lis S.A.", lines: 0, status: "Cancelled", when: "2026-09-02T09:00:00Z" },
+  { id: "ORD2026/0406", client: "Lusoforja Lda.", lines: 12, status: "Draft" as const, when: "2026-09-03T12:00:00Z" },
+  { id: "ORD2026/0405", client: "Perfis Lis S.A.", lines: 0, status: "Cancelled" as const, when: "2026-09-02T09:00:00Z" },
 ].sort((a, b) => b.when.localeCompare(a.when));
 
 export const BOM_LINES = [
