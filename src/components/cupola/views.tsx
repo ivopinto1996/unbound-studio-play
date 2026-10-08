@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { FEATURES, GROUPS, MODULE_DEFS, getDef, type Tone } from "./modules";
 import { homeView } from "./data";
 import { BOM_LINES, LEADS, ORDERS, deck, fmtTime, nf, type Lead, type ModuleId, type Tab, type ViewId } from "./data";
+import { SettingsView } from "./settings";
 
 interface Props {
   tab: Tab;
@@ -319,30 +320,6 @@ function BomReview({ tab }: Props) {
   );
 }
 
-/* ---------- settings ---------- */
-function SettingsView() {
-  const groups = [
-    ["Conta e perfil", "Nome, email, idioma"],
-    ["Notificações", "O que chega a Operations e por email"],
-    ["Empresa e utilizadores", "4 membros · 2 grupos de permissões"],
-    ["Integrações", "LinkedIn (com falhas), Outlook, SAP"],
-    ["LeadFlow", "Setores-alvo, regras de scoring"],
-    ["BOMify", "Catálogo de peças, unidades por defeito"],
-  ];
-  return (
-    <Page className="max-w-3xl">
-      <h1 className="mb-6 text-3xl font-bold">Definições</h1>
-      <div className="overflow-hidden rounded-2xl border bg-card">
-        {groups.map(([t, s]) => (
-          <div key={t} className="flex items-center justify-between border-b px-5 py-4 last:border-0 hover:bg-paper">
-            <div><div className="font-medium">{t}</div><div className="text-xs text-muted-foreground">{s}</div></div>
-            <ArrowUpRight className="size-4 text-muted-foreground" />
-          </div>
-        ))}
-      </div>
-    </Page>
-  );
-}
 
 /* ---------- catalogue ---------- */
 function Catalogue({ open, query }: Props) {
