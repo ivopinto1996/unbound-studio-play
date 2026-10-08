@@ -19,8 +19,8 @@ export interface Tab {
   view: ViewId;
   title: string;
   state: TabState;
-  progress?: number;
-  recordId?: string;
+  progress?: number | undefined;
+  recordId?: string | undefined;
 }
 
 export const MODULES: Record<ModuleId, { name: string; short: string; tagline: string }> = {
@@ -46,12 +46,12 @@ const cities = ["Leiria", "Aveiro", "Porto", "Braga", "Setúbal", "Coimbra", "Gu
 export const LEADS: Lead[] = companies.map((c, i) => ({
   id: `LD-${1047 - i}`,
   company: `${c} ${i % 3 === 0 ? "S.A." : "Lda."}`,
-  contact: i % 5 === 3 ? null : people[i % people.length],
-  score: [92, 88, 81, 77, 74, 69, 66, 63, 58, 55, 51, 47, 42, 38, 33, 29][i],
-  stage: stages[i % 5 === 4 ? 4 : i % 4],
+  contact: i % 5 === 3 ? null : people[i % people.length]!,
+  score: [92, 88, 81, 77, 74, 69, 66, 63, 58, 55, 51, 47, 42, 38, 33, 29][i]!,
+  stage: stages[i % 5 === 4 ? 4 : i % 4]!,
   source: i % 10 < 7 ? "Agente" : "Manual",
   sector: "Metalomecânica",
-  city: cities[i % cities.length],
+  city: cities[i % cities.length]!,
   updated: `${(i % 6) + 1} set`,
 }));
 
