@@ -255,7 +255,7 @@ function OrderQueue({ query, navigate }: Props) {
 
 function BomReview({ tab }: Props) {
   const [pick, setPick] = useState(3);
-  const line = BOM_LINES[pick];
+  const line = BOM_LINES[pick] ?? BOM_LINES[0]!;
   return (
     <div className="grid h-full grid-cols-2">
       <div className="flex flex-col border-r bg-paper">
