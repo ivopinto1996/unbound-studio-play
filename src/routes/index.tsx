@@ -1,24 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { CupolaShell } from "@/components/cupola/Shell";
+import { Toaster } from "@/components/ui/sonner";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Cupola — Suite de módulos de IA" },
+      { name: "description", content: "Protótipo da shell do Cupola: separadores de intenção, Operations, LeadFlow e BOMify." },
+      { property: "og:title", content: "Cupola — Suite de módulos de IA" },
+      { property: "og:description", content: "Protótipo da shell do Cupola com LeadFlow e BOMify." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: () => (
+    <>
+      <CupolaShell />
+      <Toaster position="bottom-center" />
+    </>
+  ),
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
