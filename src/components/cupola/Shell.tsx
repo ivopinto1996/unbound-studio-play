@@ -308,8 +308,8 @@ export function CupolaShell() {
   );
 }
 
-function crumbsFor(t: Tab): { label: string; view?: ViewId; title?: string }[] {
-  const m = MODULES[t.module]?.name;
+function crumbsFor(t: Tab): { label: string; view?: ViewId | undefined; title?: string | undefined }[] {
+  const m: string = MODULES[t.module]?.name ?? "";
   switch (t.view) {
     case "lf-dashboard": return [{ label: m }, { label: "Dashboard" }];
     case "lf-pipeline": return [{ label: m, view: "lf-dashboard", title: "LeadFlow" }, { label: "Pipeline" }];
