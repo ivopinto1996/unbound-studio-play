@@ -26,7 +26,7 @@ export function CupolaShell() {
   const [activeId, setActiveId] = useState("t1");
   const [opsOpen, setOpsOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const active = tabs.find((t) => t.id === activeId) ?? tabs[0];
+  const active: Tab = tabs.find((t) => t.id === activeId) ?? tabs[0] ?? DEFAULT_TABS[0]!;
 
   const patch = useCallback((id: string, p: Partial<Tab>) => setTabs((ts) => ts.map((t) => (t.id === id ? { ...t, ...p } : t))), []);
 
@@ -60,7 +60,7 @@ export function CupolaShell() {
   const close = (id: string) => {
     setTabs((ts) => {
       const next = ts.filter((t) => t.id !== id);
-      if (id === activeId && next.length) setActiveId(next[next.length - 1].id);
+      if (id === activeId && next.length) setActiveId(next[next.length - 1]!.id);
       return next.length ? next : DEFAULT_TABS.slice(0, 1);
     });
   };
