@@ -149,7 +149,7 @@ function LeadDashboard({ navigate }: Props) {
         </div>
         <div className="rounded-2xl border bg-card p-6">
           <h2 className="mb-4 text-lg font-bold">Créditos · agosto</h2>
-          <Bars data={Object.entries(l.creditos_agosto_2026.por_tipo).map(([k, v]) => ({ label: k[0].toUpperCase() + k.slice(1), value: v }))} />
+          <Bars data={Object.entries(l.creditos_agosto_2026.por_tipo).map(([k, v]) => ({ label: k.charAt(0).toUpperCase() + k.slice(1), value: v }))} />
           <button onClick={() => navigate("lf-pipeline", "Pipeline")} className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">Abrir pipeline <ArrowUpRight className="size-3.5" /></button>
         </div>
       </div>
