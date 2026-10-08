@@ -33,7 +33,7 @@ export function Workspace(p: Props) {
 const Eyebrow = ({ children }: { children: React.ReactNode }) => (
   <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{children}</div>
 );
-function Stat({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: "warn" | "bad" | "good" }) {
+function Stat({ label, value, sub, tone }: { label: string; value: string; sub?: string | undefined; tone?: "warn" | "bad" | "good" | undefined }) {
   return (
     <div className="rounded-2xl border bg-card p-5">
       <Eyebrow>{label}</Eyebrow>
@@ -512,7 +512,7 @@ function ModList({ tab, query }: Props) {
 function ModChat({ tab }: Props) {
   const def = getDef(tab.module)!;
   const c = def.chat!;
-  const [msgs, setMsgs] = useState<{ me: boolean; t: string; src?: string[] }[]>([{ me: true, t: c.q }, { me: false, t: c.a, src: c.sources }]);
+  const [msgs, setMsgs] = useState<{ me: boolean; t: string; src?: string[] | undefined }[]>([{ me: true, t: c.q }, { me: false, t: c.a, src: c.sources }]);
   const [v, setV] = useState("");
   const send = () => {
     if (!v.trim()) return;
