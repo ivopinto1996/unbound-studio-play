@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { AlertTriangle, ArrowUpRight, CheckCircle2, FileText, Sparkles, X, CircleDashed } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FEATURES, GROUPS, MODULE_DEFS, getDef, type Tone } from "./modules";
+import { homeView } from "./data";
 import { BOM_LINES, LEADS, ORDERS, deck, fmtTime, nf, type Lead, type ModuleId, type Tab, type ViewId } from "./data";
 
 interface Props {
@@ -18,6 +20,11 @@ export function Workspace(p: Props) {
     case "bm-queue": return <OrderQueue {...p} />;
     case "bm-review": return <BomReview {...p} />;
     case "settings": return <SettingsView />;
+    case "catalogue": return <Catalogue {...p} />;
+    case "mod-dashboard":
+    case "mod-list":
+    case "mod-chat":
+    case "mod-features": return <GenericModule {...p} />;
     default: return <SuiteDashboard {...p} />;
   }
 }
@@ -333,6 +340,229 @@ function SettingsView() {
           </div>
         ))}
       </div>
+    </Page>
+  );
+}
+
+/* ---------- catalogue ---------- */
+function Catalogue({ open, query }: Props) {
+  const q = query.toLowerCase();
+  return (
+    <Page>
+      <h1 className="text-3xl font-bold">Módulos</h1>
+      <p className="mb-8 mt-1 text-muted-foreground">{MODULE_DEFS.length} módulos subscritos · {Object.values(FEATURES).reduce((a, f) => a + f.length, 0)} funcionalidades</p>
+      {GROUPS.map((g) => {
+        const mods = MODULE_DEFS.filter((m) => m.group === g && (m.name + m.tagline).toLowerCase().includes(q));
+        if (!mods.length) return null;
+        return (
+          <section key={g} className="mb-8">
+            <Eyebrow>{g}</Eyebrow>
+            <div className="grid grid-cols-3 gap-4">
+              {mods.map((m) => {
+                const f = FEATURES[m.featureKey] ?? [];
+                const avail = f.filter((x) => x.s === "Disponível").length;
+                return (
+                  <button key={m.id} onClick={() => open(m.id, homeView(m.id), m.name)} className="group flex flex-col rounded-2xl border bg-card p-5 text-left transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-float">
+                    <div className="mb-4 flex items-center justify-between">
+                      <span className="num flex size-10 items-center justify-center rounded-xl bg-chrome text-sm font-medium text-chrome-foreground group-hover:bg-ai">{m.short}</span>
+                      <ArrowUpRight className="size-4 text-muted-foreground group-hover:text-primary" />
+                    </div>
+                    <span className="font-display text-lg font-bold">{m.name}</span>
+                    <span className="mt-1 flex-1 text-sm text-muted-foreground">{m.tagline}</span>
+                    <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="h-1 flex-1 rounded bg-secondary"><div className="h-full rounded bg-success" style={{ width: `${(avail / Math.max(1, f.length)) * 100}%` }} /></div>
+                      <span className="num">{avail}/{f.length}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
+    </Page>
+  );
+}
+
+/* ---------- generic module ---------- */
+const toneCls: Record<Tone, string> = {
+  good: "bg-success/10 text-success", bad: "bg-destructive/10 text-destructive", warn: "bg-warning/15 text-foreground",
+  info: "bg-info/10 text-info", muted: "bg-secondary text-muted-foreground",
+};
+const toneDot: Record<Tone, string> = { good: "bg-success", bad: "bg-destructive", warn: "bg-warning", info: "bg-info", muted: "bg-muted-foreground/40" };
+
+function GenericModule(p: Props) {
+  const def = getDef(p.tab.module);
+  if (!def) return null;
+  const nav: { v: ViewId; label: string }[] = [
+    { v: "mod-dashboard", label: "Dashboard" },
+    { v: "mod-list", label: def.list.title },
+    ...(def.chat ? [{ v: "mod-chat" as ViewId, label: "Conversa" }] : []),
+    { v: "mod-features", label: "Funcionalidades" },
+  ];
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-center gap-6 border-b px-8">
+        <div className="flex items-center gap-3 py-4">
+          <span className="num flex size-9 items-center justify-center rounded-lg bg-chrome text-xs text-chrome-foreground">{def.short}</span>
+          <div><div className="font-display font-bold leading-tight">{def.name}</div><div className="text-xs text-muted-foreground">{def.tagline}</div></div>
+        </div>
+        <div className="ml-auto flex gap-1 self-end">
+          {nav.map((n) => (
+            <button key={n.v} onClick={() => p.navigate(n.v)} className={cn("border-b-2 px-3 pb-3 text-sm transition-colors", p.tab.view === n.v ? "border-primary font-semibold text-foreground" : "border-transparent text-muted-foreground hover:text-foreground")}>{n.label}</button>
+          ))}
+        </div>
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {p.tab.view === "mod-dashboard" && <ModDashboard {...p} />}
+        {p.tab.view === "mod-list" && <ModList {...p} />}
+        {p.tab.view === "mod-chat" && <ModChat {...p} />}
+        {p.tab.view === "mod-features" && <ModFeatures {...p} />}
+      </div>
+    </div>
+  );
+}
+
+function ModDashboard({ tab, navigate }: Props) {
+  const def = getDef(tab.module)!;
+  const f = FEATURES[def.featureKey] ?? [];
+  const byState = ["Disponível", "Em desenvolvimento", "Planeada", "Por confirmar"].map((s) => ({ label: s, value: f.filter((x) => x.s === s).length }));
+  return (
+    <Page>
+      <div className="mb-6 grid grid-cols-4 gap-4">
+        {def.kpis.map((k) => <Stat key={k.label} label={k.label} value={k.value} sub={k.sub} tone={k.tone === "info" || k.tone === "muted" ? undefined : k.tone} />)}
+      </div>
+      <div className="grid grid-cols-5 gap-4">
+        <div className="col-span-3 rounded-2xl border bg-card p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-bold">{def.list.title}</h2>
+            <button onClick={() => navigate("mod-list")} className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">Ver tudo <ArrowUpRight className="size-3" /></button>
+          </div>
+          <div className="divide-y">
+            {def.list.rows.slice(0, 4).map((r) => (
+              <div key={r.id} className="flex items-center gap-3 py-2.5 text-sm">
+                <span className={cn("size-2 rounded-full", toneDot[r.tone])} />
+                <span className="flex-1 truncate">{r.title}</span>
+                <span className={cn("rounded-full px-2 py-0.5 text-xs", toneCls[r.tone])}>{r.c3}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="col-span-2 rounded-2xl border bg-card p-6">
+          <h2 className="mb-1 text-lg font-bold">Funcionalidades</h2>
+          <p className="mb-4 text-xs text-muted-foreground">{f.length} no inventário</p>
+          <Bars data={byState} />
+          <button onClick={() => navigate("mod-features")} className="mt-5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">Ver por área <ArrowUpRight className="size-3" /></button>
+        </div>
+      </div>
+    </Page>
+  );
+}
+
+function ModList({ tab, query }: Props) {
+  const def = getDef(tab.module)!;
+  const [sel, setSel] = useState<string | null>(null);
+  const rows = def.list.rows.filter((r) => (r.title + r.sub + r.id).toLowerCase().includes(query.toLowerCase()));
+  const row = def.list.rows.find((r) => r.id === sel);
+  return (
+    <div className="flex h-full">
+      <div className="flex-1 px-8 py-6">
+        {tab.state === "background" && (
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary/30 bg-accent px-4 py-3 text-sm text-accent-foreground">
+            <Sparkles className="size-4" /><span className="flex-1">{def.primary} em curso…</span><span className="num">{Math.round(tab.progress ?? 0)}%</span>
+          </div>
+        )}
+        <table className="w-full text-sm">
+          <thead><tr className="text-left text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+            <th className="pb-3 font-semibold">ID</th><th className="pb-3 font-semibold">Registo</th>
+            {def.list.cols.map((c) => <th key={c} className="pb-3 font-semibold">{c}</th>)}
+          </tr></thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.id} onClick={() => setSel(r.id)} className={cn("cursor-pointer border-t hover:bg-paper", sel === r.id && "bg-accent/60")}>
+                <td className="num py-3 text-xs text-muted-foreground">{r.id}</td>
+                <td className="py-3"><div className="font-medium">{r.title}</div><div className="text-xs text-muted-foreground">{r.sub}</div></td>
+                <td className="py-3">{r.c2}</td>
+                <td className="py-3 text-muted-foreground">{def.list.cols[1] === "Estado" ? "—" : r.c3}</td>
+                <td className="py-3"><span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", toneCls[r.tone])}>{r.c3}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {row && (
+        <aside className="w-96 shrink-0 border-l bg-paper p-6 animate-in slide-in-from-right-8 duration-200">
+          <div className="mb-4 flex items-start justify-between">
+            <div><div className="num text-xs text-muted-foreground">{row.id}</div><h2 className="text-xl font-bold">{row.title}</h2><p className="text-sm text-muted-foreground">{row.sub}</p></div>
+            <button onClick={() => setSel(null)} className="rounded-md p-1 hover:bg-secondary"><X className="size-4" /></button>
+          </div>
+          <dl className="grid grid-cols-2 gap-4 text-sm">
+            <Field k={def.list.cols[0]} v={row.c2} /><Field k={def.list.cols[2]} v={row.c3} />
+          </dl>
+          <div className="mt-6 rounded-xl border bg-card p-4">
+            <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-primary"><Sparkles className="size-3.5" />Sugestão do agente</div>
+            <p className="text-sm text-muted-foreground">Próximo passo recomendado: {def.secondary[0]?.toLowerCase()}.</p>
+          </div>
+        </aside>
+      )}
+    </div>
+  );
+}
+
+function ModChat({ tab }: Props) {
+  const def = getDef(tab.module)!;
+  const c = def.chat!;
+  const [msgs, setMsgs] = useState<{ me: boolean; t: string; src?: string[] }[]>([{ me: true, t: c.q }, { me: false, t: c.a, src: c.sources }]);
+  const [v, setV] = useState("");
+  const send = () => {
+    if (!v.trim()) return;
+    setMsgs((m) => [...m, { me: true, t: v }, { me: false, t: "Estou a analisar… (resposta de demonstração)" }]);
+    setV("");
+  };
+  return (
+    <div className="mx-auto flex h-full max-w-3xl flex-col px-8 py-6">
+      <div className="flex-1 space-y-4">
+        {msgs.map((m, i) => (
+          <div key={i} className={cn("flex", m.me && "justify-end")}>
+            <div className={cn("max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed", m.me ? "rounded-br-sm bg-chrome text-chrome-foreground" : "rounded-bl-sm border bg-card")}>
+              {!m.me && <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-primary"><Sparkles className="size-3" />{def.name}</div>}
+              {m.t}
+              {m.src && <div className="mt-3 flex flex-wrap gap-1.5">{m.src.map((s) => <span key={s} className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground"><FileText className="size-3" />{s}</span>)}</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+      <form onSubmit={(e) => { e.preventDefault(); send(); }} className="sticky bottom-0 mt-6 flex items-center gap-2 rounded-2xl border bg-card p-2 shadow-float">
+        <input value={v} onChange={(e) => setV(e.target.value)} placeholder={c.placeholder} className="flex-1 bg-transparent px-3 py-2 text-sm outline-none" />
+        <button className="rounded-xl bg-ai px-4 py-2 text-sm font-semibold text-primary-foreground">Enviar</button>
+      </form>
+    </div>
+  );
+}
+
+const stateTone: Record<string, Tone> = { "Disponível": "good", "Em desenvolvimento": "info", "Planeada": "warn", "Por confirmar": "muted" };
+function ModFeatures({ tab, query }: Props) {
+  const def = getDef(tab.module)!;
+  const q = query.toLowerCase();
+  const f = (FEATURES[def.featureKey] ?? []).filter((x) => (x.n + x.id + x.g).toLowerCase().includes(q));
+  const areas = [...new Set(f.map((x) => x.a))].sort((a, b) => f.filter((x) => x.a === b).length - f.filter((x) => x.a === a).length);
+  return (
+    <Page>
+      {areas.map((a) => (
+        <section key={a} className="mb-6">
+          <div className="mb-2 flex items-baseline justify-between"><Eyebrow>{a}</Eyebrow><span className="num text-xs text-muted-foreground">{f.filter((x) => x.a === a).length}</span></div>
+          <div className="overflow-hidden rounded-2xl border bg-card">
+            {f.filter((x) => x.a === a).map((x) => (
+              <div key={x.id} className="flex items-center gap-4 border-b px-5 py-2.5 text-sm last:border-0">
+                <span className="num w-20 shrink-0 text-xs text-muted-foreground">{x.id}</span>
+                <span className="flex-1">{x.n}</span>
+                <span className="hidden w-48 truncate text-xs text-muted-foreground lg:block">{x.g}</span>
+                <span className={cn("w-32 shrink-0 rounded-full px-2 py-0.5 text-center text-xs", toneCls[stateTone[x.s] ?? "muted"])}>{x.s}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
     </Page>
   );
 }
